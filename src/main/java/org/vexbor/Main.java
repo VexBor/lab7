@@ -1,18 +1,30 @@
 package org.vexbor;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import org.vexbor.data.CategoryRepository;
+import org.vexbor.data.DatabaseManager;
+import org.vexbor.data.ProductRepository;
+import org.vexbor.model.Category;
+import org.vexbor.model.Product;
+
 public class Main {
-
   static void main() {
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    IO.println(String.format("Hello and welcome!"));
+    DatabaseManager db = new DatabaseManager("./data/supermarket.db");
+    db.init();
 
-    for (int i = 1; i <= 5; i++) {
-      //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-      // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-      IO.println("i = " + i);
-    }
+    CategoryRepository categories = new CategoryRepository(db);
+    ProductRepository products = new ProductRepository(db);
+
+    Category fruits = categories.create(new Category(null, "Fruits " + System.currentTimeMillis()));
+    Product apple = products.create(new Product(null, "Apple", 12.5, fruits.id()));
+    System.out.println("Created: " + fruits + ", " + apple);
+
+    System.out.println("findById: " + products.findById(apple.id()).orElseThrow());
+    System.out.println("All categories: " + categories.findAll());
+
+    products.update(new Product(apple.id(), "Green apple", 14.0, fruits.id()));
+    System.out.println("Updated: " + products.findById(apple.id()).orElseThrow());
+
+    System.out.println("Deleted product: " + products.deleteById(apple.id()));
+    System.out.println("Deleted category: " + categories.deleteById(fruits.id()));
   }
 }
